@@ -42,6 +42,24 @@ class ConversationHandler extends Thread{
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
 			
+			int count = 0;
+			while(true){
+				if (count > 0) out.println("UserNameExists");
+				else out.println("UserNameRequired");
+				
+				name = in.readLine();
+				
+				if (name == null) return;
+				
+				if (!ChatServer.userNames.contains(name)){
+					ChatServer.userNames.add(name);
+					break;
+				}
+				count++;
+			}
+			out.println("UserNameAccepted");
+			ChatServer.printWriters.add(out);
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
