@@ -1,4 +1,5 @@
 import java.awt.FlowLayout;
+import java.awt.event.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -12,23 +13,29 @@ public class ChatClient {
 	static JLabel blankLabel = new JLabel("            ");
 	static JButton sendButton = new JButton("Send");
 	
+	static JLabel nameLabel = new JLabel("            ");
+	
 	static BufferedReader in;
 	static PrintWriter out;
 	
 	ChatClient(){
 		chatWindow.setLayout(new FlowLayout());
 		
+		chatWindow.add(nameLabel);
 		chatWindow.add(new JScrollPane(chatArea));
 		chatWindow.add(blankLabel);
 		chatWindow.add(textField);
 		chatWindow.add(sendButton);
 		
 		chatWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		chatWindow.setSize(475, 500);
+		chatWindow.setSize(500, 500);
 		chatWindow.setVisible(true);
 		
 		textField.setEditable(false);
 		chatArea.setEditable(false);
+		
+		sendButton.addActionListener(new Listener());
+		textField.addActionListener(new Listener());
 	}
 	
 	void startChat() throws Exception{
@@ -46,7 +53,7 @@ public class ChatClient {
 			String str = in.readLine();
 			
 			String name;
-			if (str.equals("UserNameRequired")){
+			if (str.startsWith("UserNameRequired")){
 				name = JOptionPane.showInputDialog(
 						chatWindow, 
 						"Enter User Name: ",
@@ -54,7 +61,7 @@ public class ChatClient {
 						JOptionPane.PLAIN_MESSAGE);
 				out.println(name);
 			}
-			else if (str.equals("UserNameExists")){
+			else if (str.startsWith("UserNameExists")){
 				name = JOptionPane.showInputDialog(
 						chatWindow, 
 						"Enter User Name: ",
@@ -62,8 +69,12 @@ public class ChatClient {
 						JOptionPane.WARNING_MESSAGE);
 				out.println(name);
 			}
-			else if (str.equals("UserNameAccepted")) {
+			else if (str.startsWith("UserNameAccepted")) {
 				textField.setEditable(true);
+				nameLabel.setText("You Are Logged in as: "+str.split(",")[1]);
+			}
+			else {
+				chatArea.append(str+"\n");
 			}
 			
 		}
@@ -74,3 +85,16 @@ public class ChatClient {
 		client.startChat();
 	}
 }
+
+
+class Listener implements ActionListener{
+	
+	@Override
+	public void actionPerformed(ActionEvent e){
+		ChatClient.out.println(ChatClient.textField.getText());
+		ChatClient.textField.setText("");
+	}
+}
+
+
+

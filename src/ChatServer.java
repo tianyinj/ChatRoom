@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.file.Paths;
 import java.util.*;
 import javax.swing.*;
 
@@ -33,8 +34,17 @@ class ConversationHandler extends Thread{
 	PrintWriter out;
 	String name;
 	
-	ConversationHandler(Socket socket){
+	PrintWriter logger;
+	static FileWriter fw;
+	static BufferedWriter bw;
+	
+	ConversationHandler(Socket socket) throws IOException{
 		this.socket = socket;
+		
+		
+		fw = new FileWriter("chat-log", true);
+		bw = new BufferedWriter(fw);
+		logger = new PrintWriter(bw, true);
 	}
 	
 	public void run(){
@@ -57,8 +67,19 @@ class ConversationHandler extends Thread{
 				}
 				count++;
 			}
-			out.println("UserNameAccepted");
+			out.println("UserNameAccepted,"+name);
 			ChatServer.printWriters.add(out);
+			
+			while(true){
+				String msg = in.readLine();
+				if (msg == null) return;
+				
+				logger.println(name + ": " + msg);
+				
+				for (PrintWriter writer: ChatServer.printWriters){
+					writer.println(name + ": " + msg);
+				}
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
